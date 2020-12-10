@@ -55,7 +55,7 @@ public class XWPFTemplateTest {
         // A4
 //        MiniTableRenderData miniTableRenderData = new MiniTableRenderData(header, tableDatas, MiniTableRenderData.WIDTH_A4_FULL);
 
-        MiniTableRenderData miniTableRenderData = new MiniTableRenderData(header, tableDatas, 15F);
+        MiniTableRenderData miniTableRenderData = new MiniTableRenderData(header, tableDatas, 16F);
         Map<String, Object> datas = new HashMap<String, Object>() {
             {
                 put("theHeard", "数据库词典文档");
@@ -68,7 +68,7 @@ public class XWPFTemplateTest {
             }
         };
 
-        XWPFTemplate template = XWPFTemplate.compile("src/main/resources/template/template.docx").render(datas);
+        XWPFTemplate template = XWPFTemplate.compile("src/main/resources/template/table_template.docx").render(datas);
 
         FileOutputStream out = new FileOutputStream("export-db-dic.docx");
         template.write(out);
@@ -89,7 +89,6 @@ public class XWPFTemplateTest {
         obj.setAuthor("Sayi卅一");
         obj.setIntroduce("http://www.deepoove.com");
         obj.setPortrait(new PictureRenderData(60, 60, "src/main/test/resources/sayi.png"));
-
         // 表格
         obj.setSolutionCompare(new MiniTableRenderData(header, tableDatas));
         // 有序列表
@@ -101,7 +100,7 @@ public class XWPFTemplateTest {
             }
         }));
 
-        XWPFTemplate template = XWPFTemplate.compile("src/main/test/resources/template/template.docx").render(obj);
+        XWPFTemplate template = XWPFTemplate.compile("src/main/test/resources/template/table_template.docx").render(obj);
 
         FileOutputStream out = new FileOutputStream("out_template_object.docx");
         template.write(out);

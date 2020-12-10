@@ -2,20 +2,25 @@ package cn.tlh.ex.test;
 
 import cn.tlh.ex.Application;
 import cn.tlh.ex.dao.ExportDao;
-import cn.tlh.ex.entity.Tables;
+import cn.tlh.ex.model.Columns;
+import cn.tlh.ex.model.Tables;
 import com.deepoove.poi.XWPFTemplate;
 import com.deepoove.poi.data.*;
-import org.junit.Before;
+import com.deepoove.poi.data.style.Style;
+import com.deepoove.poi.data.style.TableStyle;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
-
-import static javax.swing.UIManager.put;
 
 /**
  * @author: TANG
@@ -37,75 +42,166 @@ public class ExportTest {
         for (Tables tables : tablesByDbName) {
             System.out.println("tables.toString() = " + tables.toString());
             count++;
-
         }
         System.out.println("一共 " + count + " 张表");
     }
 
-    @Test
-    public void test2() {
-        RowRenderData header = RowRenderData.build(new TextRenderData("FFFFFF", "姓名"), new TextRenderData("FFFFFF", "学历"));
-
-        RowRenderData row0 = RowRenderData.build("张三", "研究生");
-        RowRenderData row1 = RowRenderData.build("李四", "博士");
-        put("table", new MiniTableRenderData(header, Arrays.asList(row0, row1)));
-    }
 
     RowRenderData header;
     List<RowRenderData> tableDatas;
 
-    @Before
-    public void init() {
-        header = new RowRenderData(
-                Arrays.asList(
-                        new TextRenderData("FFFFFF", "序号"),
-                        new TextRenderData("FFFFFF", "字段名称"),
-                        new TextRenderData("FFFFFF", "字段描述"),
-                        new TextRenderData("FFFFFF", "字段类型"),
-                        new TextRenderData("FFFFFF", "长度"),
-                        new TextRenderData("FFFFFF", "允许空"),
-                        new TextRenderData("FFFFFF", "缺省值")
-                ),
-                "ff9800");
-        RowRenderData row0 = RowRenderData.build("Poi-tl", "纯Java组件，跨平台", "简单：模板引擎功能，并对POI进行了一些封装");
-        RowRenderData row1 = RowRenderData.build("Apache Poi", "纯Java组件，跨平台", "简单，缺少一些功能的封装");
-        RowRenderData row2 = RowRenderData.build("Freemarker", "XML操作，跨平台", "复杂，需要理解XML结构");
-        RowRenderData row3 = RowRenderData.build("OpenOffice", "需要安装OpenOffice软件", "复杂，需要了解OpenOffice的API");
-        RowRenderData row4 = RowRenderData.build("Jacob、winlib", "Windows平台", "复杂，不推荐使用");
-        tableDatas = Arrays.asList(row0, row1, row2, row3, row4);
-    }
+    public static final String dbName = "bfp2.0_dev";
+    public static final String title = dbName + "数据库说明文档";
 
     @Test
-    public void testRenderMap() throws Exception {
-        Map<String, Object> datas = new HashMap<String, Object>() {
-            {
-                put("header", "Deeply love what you love.");
-                put("name", "Poi-tl");
-                put("word", "模板引擎");
-                put("time", "2019-05-31");
-                put("what", "Java Word模板引擎： Minimal Microsoft word(docx) templating with {{template}} in Java. It works by expanding tags in a template using values provided in a JavaMap or JavaObject.");
-                put("author", new TextRenderData("000000", "Sayi卅一"));
-                put("introduce", new HyperLinkTextRenderData("http://www.deepoove.com", "http://www.deepoove.com"));
-                put("portrait", new PictureRenderData(60, 60, "src/test/resources/sayi.png"));
-                // 表格
-                put("solution_compare", new MiniTableRenderData(header, tableDatas, MiniTableRenderData.WIDTH_A4_FULL));
-                // 有序列表
-                put("feature", new NumbericRenderData(new ArrayList<TextRenderData>() {
-                    {
-                        add(new TextRenderData("Plug-in grammar, add new grammar by yourself"));
-                        add(new TextRenderData("Supports word text, local pictures, web pictures, table, list, header, footer..."));
-                        add(new TextRenderData("Templates, not just templates, but also style templates"));
-                    }
-                }));
-            }
-        };
+    public void testExport() {
+        List<Tables> tablesList = exportDao.getTables(dbName);
+        // 表头
+        RowRenderData header = this.getTableHeader();
+        int count = 0;
+        List<Map<String, Object>> tableList = new ArrayList<Map<String, Object>>();
+        // 最终返回数据
+        Map<String, Object> exportData = new HashMap<>();
+        // 文档标题
+        exportData.put("title", title);
+        for (Tables table : tablesList) {
+            count++;
+            // 获取某张表的字段列表
+            List<RowRenderData> rowList = getTableRow(table);
+            Map<String, Object> data = new HashMap<>();
+            data.put("no", count);
+            data.put("tableComment", table.getTableComment());
+            data.put("engine", table.getEngine());
+            data.put("tableCollation", table.getTableCollation());
+            data.put("tableType", table.getTableType());
+            data.put("tableName", table.getTableName());
+            // 一张表
+            MiniTableRenderData miniTableRenderData = new MiniTableRenderData(header, rowList);
+            // 自适应性宽度
+//            miniTableRenderData.setWidth(0);
+            miniTableRenderData.setWidth(20);
+            data.put("tableData", miniTableRenderData);
+            tableList.add(data);
+        }
+        exportData.put("tableList", new DocxRenderData(new File("src/main/resources/template/table_template.docx"), tableList));
 
-        XWPFTemplate template = XWPFTemplate.compile("src/main/resources/template/db-dic-template.docx").render(datas);
-        FileOutputStream out = new FileOutputStream("out_template.docx");
-        template.write(out);
-        out.flush();
-        out.close();
-        template.close();
+        XWPFTemplate template = XWPFTemplate.compile("src/main/resources/template/export_dic_template.docx").render(exportData);
+
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(dbName + "数据库文档(MySQL)" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".docx");
+            System.out.println("生成文件结束");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            System.out.println("生成文件失败");
+        } finally {
+            try {
+                template.write(out);
+                assert out != null;
+                out.flush();
+                out.close();
+                template.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 字体样式
+     *
+     * @return Style
+     */
+    public Style getHeardFontStyle() {
+        Style style = new Style();
+        style.setBold(true);
+        style.setFontSize(10);
+//        style.setColor("000000"); // 黑色
+        style.setColor("F8F8FF"); // 白色
+        style.setFontFamily("宋体");
+        return style;
+    }
+
+    // 表头单元格背景
+    public TableStyle getHeaderTableStyle() {
+        TableStyle style = new TableStyle();
+//        style.setBackgroundColor("B7B7B7"); //灰色
+        style.setBackgroundColor("4F81BD"); //深蓝色
+//        style.setBackgroundColor("7BA0CE"); //中等蓝色
+//        style.setBackgroundColor("DBE5F1"); //浅蓝色
+        // 左对齐
+//        style.setAlign(STJc.Enum.forInt(1));
+        return style;
+    }
+
+    /**
+     * 表头字体设置
+     *
+     * @return RowRenderData
+     */
+    private RowRenderData getTableHeader() {
+        header = RowRenderData.build(
+                new TextRenderData("序号", this.getHeardFontStyle()),
+                new TextRenderData("字段名称", this.getHeardFontStyle()),
+                new TextRenderData("字段描述", this.getHeardFontStyle()),
+                new TextRenderData("字段类型", this.getHeardFontStyle()),
+                new TextRenderData("长度", this.getHeardFontStyle()),
+                new TextRenderData("允许空", this.getHeardFontStyle()),
+                new TextRenderData("缺省值", this.getHeardFontStyle()));
+        header.setRowStyle(this.getHeaderTableStyle());
+        return header;
+    }
+
+
+
+
+    /**
+     * 渲染一张表的行
+     *
+     * @return List<RowRenderData>
+     */
+    private List<RowRenderData> getTableRow(Tables table) {
+        List<Columns> columnsList = exportDao.getColums(dbName, table.getTableName());
+        List<RowRenderData> result = new ArrayList<>();
+        for (Columns columns : columnsList) {
+            Long characterMaximumLength = columns.getCharacterMaximumLength();
+            characterMaximumLength = characterMaximumLength == null ? 0 : characterMaximumLength;
+            // 渲染每一行数据
+            RowRenderData row = RowRenderData.build(
+                    new TextRenderData(columns.getOrdinalPosition().toString()),
+                    new TextRenderData(columns.getColumnName()),
+                    new TextRenderData(columns.getColumnComment()),
+                    new TextRenderData(columns.getDataType()),
+                    new TextRenderData(characterMaximumLength.toString()),
+                    new TextRenderData(columns.getIsNullable()),
+                    new TextRenderData(columns.getColumnDefault())
+            );
+            result.add(row);
+        }
+        return result;
+    }
+
+    /**
+     * 获取数据库的所有表名及表的信息
+     *
+     * @return list
+     */
+    private static List<Map<String, String>> getTableName(List<Tables> tablesList) {
+        List<Map<String, String>> list = new ArrayList<>();
+        for (Tables table : tablesList) {
+            // 存放单独一张表的结构信息
+            Map<String, String> result = new HashMap<>();
+            result.put("table_name", table.getTableName());
+            result.put("table_type", table.getTableType());
+            result.put("engine", table.getEngine());
+            result.put("table_collation", table.getTableCollation());
+            result.put("table_comment", table.getTableComment());
+            result.put("create_options", table.getCreateOptions());
+            list.add(result);
+        }
+        return list;
     }
 
 }
+
+
