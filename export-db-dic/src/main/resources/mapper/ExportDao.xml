@@ -2,26 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.tlh.ex.dao.ExportDao">
 
-    <resultMap type="cn.tlh.ex.entity.Tables" id="TablesMap">
-        <result property="tableCatalog" column="TABLE_CATALOG" jdbcType="VARCHAR"/>
-        <result property="tableSchema" column="TABLE_SCHEMA" jdbcType="VARCHAR"/>
+    <resultMap type="cn.tlh.ex.model.Tables" id="TablesMap">
         <result property="tableName" column="TABLE_NAME" jdbcType="VARCHAR"/>
         <result property="tableType" column="TABLE_TYPE" jdbcType="VARCHAR"/>
         <result property="engine" column="ENGINE" jdbcType="VARCHAR"/>
-        <result property="version" column="VERSION" jdbcType="OTHER"/>
-        <result property="rowFormat" column="ROW_FORMAT" jdbcType="VARCHAR"/>
-        <result property="tableRows" column="TABLE_ROWS" jdbcType="OTHER"/>
-        <result property="avgRowLength" column="AVG_ROW_LENGTH" jdbcType="OTHER"/>
-        <result property="dataLength" column="DATA_LENGTH" jdbcType="OTHER"/>
-        <result property="maxDataLength" column="MAX_DATA_LENGTH" jdbcType="OTHER"/>
-        <result property="indexLength" column="INDEX_LENGTH" jdbcType="OTHER"/>
-        <result property="dataFree" column="DATA_FREE" jdbcType="OTHER"/>
-        <result property="autoIncrement" column="AUTO_INCREMENT" jdbcType="OTHER"/>
-        <result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP"/>
-        <result property="updateTime" column="UPDATE_TIME" jdbcType="TIMESTAMP"/>
-        <result property="checkTime" column="CHECK_TIME" jdbcType="TIMESTAMP"/>
         <result property="tableCollation" column="TABLE_COLLATION" jdbcType="VARCHAR"/>
-        <result property="checksum" column="CHECKSUM" jdbcType="OTHER"/>
         <result property="createOptions" column="CREATE_OPTIONS" jdbcType="VARCHAR"/>
         <result property="tableComment" column="TABLE_COMMENT" jdbcType="VARCHAR"/>
     </resultMap>
@@ -47,28 +32,17 @@
 	        TABLE_SCHEMA = #{dbName}
     </select>
 
-    <resultMap type="cn.tlh.ex.entity.Columns" id="ColumnsMap">
-        <result property="tableCatalog" column="TABLE_CATALOG" jdbcType="VARCHAR"/>
-        <result property="tableSchema" column="TABLE_SCHEMA" jdbcType="VARCHAR"/>
-        <result property="tableName" column="TABLE_NAME" jdbcType="VARCHAR"/>
+    <resultMap type="cn.tlh.ex.model.Columns" id="ColumnsMap">
         <result property="columnName" column="COLUMN_NAME" jdbcType="VARCHAR"/>
         <result property="ordinalPosition" column="ORDINAL_POSITION" jdbcType="OTHER"/>
         <result property="columnDefault" column="COLUMN_DEFAULT" jdbcType="OTHER"/>
         <result property="isNullable" column="IS_NULLABLE" jdbcType="VARCHAR"/>
         <result property="dataType" column="DATA_TYPE" jdbcType="VARCHAR"/>
         <result property="characterMaximumLength" column="CHARACTER_MAXIMUM_LENGTH" jdbcType="OTHER"/>
-        <result property="characterOctetLength" column="CHARACTER_OCTET_LENGTH" jdbcType="OTHER"/>
-        <result property="numericPrecision" column="NUMERIC_PRECISION" jdbcType="OTHER"/>
-        <result property="numericScale" column="NUMERIC_SCALE" jdbcType="OTHER"/>
-        <result property="datetimePrecision" column="DATETIME_PRECISION" jdbcType="OTHER"/>
-        <result property="characterSetName" column="CHARACTER_SET_NAME" jdbcType="VARCHAR"/>
-        <result property="collationName" column="COLLATION_NAME" jdbcType="VARCHAR"/>
         <result property="columnType" column="COLUMN_TYPE" jdbcType="OTHER"/>
         <result property="columnKey" column="COLUMN_KEY" jdbcType="VARCHAR"/>
         <result property="extra" column="EXTRA" jdbcType="VARCHAR"/>
-        <result property="privileges" column="PRIVILEGES" jdbcType="VARCHAR"/>
         <result property="columnComment" column="COLUMN_COMMENT" jdbcType="VARCHAR"/>
-        <result property="generationExpression" column="GENERATION_EXPRESSION" jdbcType="OTHER"/>
     </resultMap>
 
 
@@ -94,7 +68,7 @@
             table_schema = #{param1} AND table_name = #{param2}
     </select>
 
-    <select id="getColumsByTableList" resultType="cn.tlh.ex.entity.Columns">
+    <select id="getColumsByTableList" resultType="cn.tlh.ex.model.Columns">
         SELECT
         ORDINAL_POSITION,
         COLUMN_NAME,

@@ -1,7 +1,7 @@
 package cn.tlh.ex.dao;
 
-import cn.tlh.ex.entity.Columns;
-import cn.tlh.ex.entity.Tables;
+import cn.tlh.ex.model.Columns;
+import cn.tlh.ex.model.Tables;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
