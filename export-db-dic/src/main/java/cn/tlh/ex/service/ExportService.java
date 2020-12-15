@@ -1,7 +1,8 @@
 package cn.tlh.ex.service;
 
-import cn.tlh.ex.entity.Columns;
-import cn.tlh.ex.entity.Tables;
+
+import cn.tlh.ex.model.Columns;
+import cn.tlh.ex.model.Tables;
 
 import java.util.List;
 
