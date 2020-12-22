@@ -1,2 +1,2 @@
 # Generate MySQL Data Dictionary
-使用poi-tl导出mysql数据词典
+使用[poi-tl](http://deepoove.com/poi-tl/)导出mysql数据词典
