@@ -36,15 +36,15 @@ public class SwaggerConfig {
      * url:开发者网址
      * email:开发者邮箱
      *
-     * @return
+     * @return /
      */
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 //标题
-                .title("export-db-dic")
+                .title("Export-db-dic")
                 //文档接口的描述
-                .description("导出数据库词典(MySQL)")
-                .contact(new Contact("蛮吉", "", " "))
+                .description("导出数据库词典(MySQL)，生成文档位置跟项目同级")
+                .contact(new Contact("TANG", "", " "))
                 //版本号
                 .version("1.0.0")
                 .build();

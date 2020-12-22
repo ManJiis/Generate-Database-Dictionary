@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- * @author: TANG
- * @description: 导出
- * @date: 2020-12-07
+ * @author TANG
+ * @description 导出
+ * @date 2020-12-07
  */
 public interface ExportDao {
 

@@ -11,13 +11,20 @@ import com.deepoove.poi.data.TextRenderData;
 import com.deepoove.poi.data.style.Style;
 import com.deepoove.poi.data.style.TableStyle;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.validation.constraints.NotBlank;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -31,34 +38,63 @@ import java.util.Map;
 
 
 /**
+ * http://localhost:8079/doc.html
+ *
  * @author TANG
  */
 @RestController
 @RequestMapping("export")
-@Api(tags = "T1-文档")
+@Validated
+@Api(tags = "导出：数据词典")
 public class ExportController {
     @Resource
     private ExportDao exportDao;
 
     public static String DB_NAME = "bfp2.0_dev";
     public static String TITLE = DB_NAME + "数据库说明文档";
+    public static String DB_TYPE = "MySQL";
+    public static String PROJECT_VERSION = "2.0";
+    public static String PROJECT_NAME = "bfp";
+    public static String UPDATE_BY = "xxx";
+
+    @Getter
+    @Setter
+    @ToString
+    @ApiModel("请求实体")
+    static class DbVO {
+        @ApiModelProperty(value = "数据库名称", required = true)
+        @NotBlank(message = "数据库名称不能为空")
+        private String dbName = DB_NAME;
+        private String title = dbName + "数据库说明文档";
+        @ApiModelProperty("数据库类型 (例如:MySQL、Oracle),目前仅支持MySQL")
+        private String dbType = DB_TYPE;
+        @ApiModelProperty("当前项目版本 (例如:1.0、2.0)")
+        private String projectVersion = PROJECT_VERSION;
+        @ApiModelProperty("项目名称")
+        private String projectName = PROJECT_NAME;
+        @ApiModelProperty("修改人")
+        private String updateBy = UPDATE_BY;
+    }
 
     @GetMapping("/doc")
     @ApiOperation(value = "导出", tags = "")
-    public void exportDoc(String dbName) {
-        if (StringUtils.isNotBlank(dbName)) {
-            DB_NAME = dbName;
-            TITLE = DB_NAME + "数据库说明文档";
-        }
+    public void exportDoc(DbVO dbVO) {
         List<Tables> tablesList = exportDao.getTables(DB_NAME);
         // 表头
         RowRenderData header = this.renderTableHeader();
         int count = 0;
+        String localDateNow = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDate.now());
         List<Map<String, Object>> tableList = new ArrayList<Map<String, Object>>();
         // 最终返回数据
         Map<String, Object> exportData = new HashMap<>();
-        // 文档标题
-        exportData.put("title", TITLE);
+        exportData.put("title", dbVO.getTitle());
+        exportData.put("projectName", dbVO.getProjectName());
+        exportData.put("dbType", dbVO.getDbType());
+        exportData.put("projectVersion", dbVO.getProjectVersion());
+        exportData.put("updateTime", localDateNow);
+        exportData.put("remark", "创建数据库说明文档");
+        exportData.put("updateBy", dbVO.getUpdateBy());
+        // 循环创建表
         for (Tables table : tablesList) {
             count++;
             // 获取某张表的字段列表
@@ -84,7 +120,7 @@ public class ExportController {
 
         FileOutputStream out = null;
         try {
-            out = new FileOutputStream(DB_NAME + "数据库文档(MySQL)" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".docx");
+            out = new FileOutputStream(DB_NAME + "数据库文档" + localDateNow + ".docx");
             System.out.println("生成文件结束");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
