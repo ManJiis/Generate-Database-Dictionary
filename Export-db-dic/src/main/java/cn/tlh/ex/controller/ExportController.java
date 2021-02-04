@@ -55,26 +55,7 @@ public class ExportController {
     public static String DB_TYPE = "MySQL";
     public static String PROJECT_VERSION = "2.0";
     public static String PROJECT_NAME = "bfp";
-    public static String UPDATE_BY = "xxx";
-
-    @Getter
-    @Setter
-    @ToString
-    @ApiModel("请求实体")
-    static class DbVO {
-        @ApiModelProperty(value = "数据库名称", required = true)
-        @NotBlank(message = "数据库名称不能为空")
-        private String dbName = DB_NAME;
-        private String title = dbName + "数据库说明文档";
-        @ApiModelProperty("数据库类型 (例如:MySQL、Oracle),目前仅支持MySQL")
-        private String dbType = DB_TYPE;
-        @ApiModelProperty("当前项目版本 (例如:1.0、2.0)")
-        private String projectVersion = PROJECT_VERSION;
-        @ApiModelProperty("项目名称")
-        private String projectName = PROJECT_NAME;
-        @ApiModelProperty("修改人")
-        private String updateBy = UPDATE_BY;
-    }
+    public static String UPDATE_BY = "张三";
 
     @GetMapping("/doc")
     @ApiOperation(value = "导出", tags = "")
@@ -120,7 +101,7 @@ public class ExportController {
 
         FileOutputStream out = null;
         try {
-            out = new FileOutputStream(DB_NAME + "数据库文档" + localDateNow + ".docx");
+            out = new FileOutputStream(TITLE + localDateNow + ".docx");
             System.out.println("生成文件结束");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
